@@ -1,0 +1,29 @@
+hdfs dfs -cat /user/cloudera/HiveData/categoriesavro/part-m-00001.avro
+mkdir avro
+cd avro
+hdfs dfs -ls /user/cloudera/HiveData
+hadoop fs -get /user/cloudera/HiveData/categoriesavro
+cd categoriesavro
+ls -l
+gedit categori
+	60,2,xzy
+	61,8,abc
+	<categori>
+	<record>
+	<category_id>60</category_id>
+	<category_department_id>2</category_department_id>
+	<category_name>xyz</category_name>
+	</record>
+	<record>
+	<category_id>61/category_id>
+	<category_department_id>8</category_department_id>
+	<category_name>abc</category_name>
+	</record>
+	</categori>
+ls -l
+avro-tools getmeta part-m-00000.avro
+avro-tools getschema part-m-00000.avro
+avro-tools tojson part-m-00000.avro
+avro-tools fromjson department.json
+avro-tools getschema part-m-00000.avro > categori.avsc
+cat categori.avsc

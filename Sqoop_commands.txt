@@ -1,0 +1,76 @@
+Sqoop commands:
+
+sqoop help
+
+sqoop help import
+
+
+sqoop list-databases --connect "jdbc:mysql://localhost" --username training --password training
+
+sqoop list-tables --connect "jdbc:mysql://localhost/training" --username training -P
+
+sqoop import --connect "jdbc:mysql://localhost/training" --username training -P --table countries --target-dir  /user/training/SqoopData_1 -m 1
+
+sqoop import --connect "jdbc:mysql://localhost/training" --username training -P --table countries --target-dir  /user/training/SqoopData_1 -m 4
+
+using Clause:
+
+sqoop import --connect "jdbc:mysql://localhost/training" --username training -P --table cityByCountry --target-dir /user/where_clause_1 --where "state='Alaska'" -m 1
+
+using --query option:
+
+sqoop import --connect jdbc:mysql://localhost/training --username training -P --query "select * from Movies t2 where \$CONDITIONS" --split-by  t2.movieid --target-dir /user/simple1
+
+Using join operation:
+
+sqoop import --connect jdbc:mysql://localhost/training --username training -P --query "select t2.number, t1.country_name, t2.city_name from t2 join t1 using (id) where \$CONDITIONS" --split-by id --target-dir /user/join -m 1
+
+
+
+
+----
+create hive table but don't import data
+
+sqoop create-hive-table --connect jdbc:mysql://localhost/training --username training -P --table countries --hive-table countriesnew
+
+-----------
+Using custom delimiter:
+
+Import data from rdbms and store data in hdfs with pipe (|) as delimiter?
+
+sqoop import --connect jdbc:mysql://localhost/training --username training -P --table countries --target-dir /user/training/customdelim1 -m 1 --fields-terminated-by '|'
+
+hadoop fs -cat /user/training/customdelim1/*
+
+--------------------
+
+Incremental import:
+
+Sqoop is a utility to import data from rdbms to hadoop. In some usecases, the data in the rdbms system will be incrementing daily. So in those usecases, we have to import the latest data to hdfs also. But importing the entire table for every modification will be an expensive operation. Sqoop provides an option to import the updated records alone. This feature is known as incremental import. Here is an example for that ?
+
+hive -e "drop table countries"
+hadoop fs -rmr /user/training/countries
+sqoop import --connect jdbc:mysql://localhost/training --username training -P --table countries --hive-import -m 1
+hive -e "select * from countries"
+
+
+Suppose the MAX of ID returned a value of 249, we will use that value for the next import
+
+mysql -u training -e "insert into training.countries (name, code) values ('Russia', 'RS')" -p
+mysql -u training -e "insert into training.countries (name, code) values ('China', 'CN')" -p
+mysql -u training -e "insert into training.countries (name, code) values ('Zambia', 'ZB')" -p
+
+sqoop import --connect jdbc:mysql://localhost/training --username training -P --table countries --hive-import -m 1 --incremental append --check-column id --last-value 249
+
+hive -e "select * from countries"
+
+----------------------------
+Sqoop Export:
+
+create table exported ( id int, country varchar(100), code varchar(100));
+
+describe exported;
+
+/user/training/customdelim1/part-m-00000
+
+sqoop export --connect jdbc:mysql://localhost/training --username training -P --table exported --export-dir /user/training/customdelim1/part-m-00000 --fields-terminated-by '|'

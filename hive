@@ -1,0 +1,4 @@
+sudo hive
+create table Distributer_info2 (id int, product String, name String, quantity int, stability float, amount float, pnum float, Distributer String,Division String, ratio float,time timestamp) row format delimited fields terminated by ',' stored as textfile location '/user/training/MyExtTable';
+show tables;
+
